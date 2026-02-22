@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculadora de Ahorros y Rendimiento</title>
+  <meta name="description" content="Calcula la evolución de tus ahorros con interés compuesto, aportes mensuales y comparación de escenarios." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ========== HEADER ========== -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">📈</span>
+        <div>
+          <h1 class="logo-title">Calculadora de Ahorros</h1>
+          <p class="logo-sub">y Rendimiento con Interés Compuesto</p>
+        </div>
+      </div>
+      <div class="currency-wrap">
+        <label for="currency">Moneda</label>
+        <select id="currency">
+          <option value="USD">🇺🇸 USD</option>
+          <option value="EUR">🇪🇺 EUR</option>
+          <option value="ARS" selected>🇦🇷 ARS</option>
+          <option value="MXN">🇲🇽 MXN</option>
+          <option value="CLP">🇨🇱 CLP</option>
+          <option value="COP">🇨🇴 COP</option>
+          <option value="BRL">🇧🇷 BRL</option>
+        </select>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========== TABS ========== -->
+  <main class="main">
+    <div class="tabs">
+      <button class="tab active" data-tab="single" id="tab-single">Escenario Único</button>
+      <button class="tab" data-tab="compare" id="tab-compare">Comparar Escenarios</button>
+    </div>
+
+    <!-- ====== TAB: SINGLE ====== -->
+    <section class="tab-content active" id="tab-content-single">
+
+      <!-- Input Form -->
+      <div class="card form-card">
+        <h2 class="card-title">📥 Datos de entrada</h2>
+        <div class="form-grid">
+
+          <div class="field">
+            <label for="initialCapital">Capital inicial</label>
+            <div class="input-wrap">
+              <span class="input-prefix currency-symbol">$</span>
+              <input type="number" id="initialCapital" min="0" step="any" placeholder="10,000" />
+            </div>
+            <span class="field-error" id="err-initialCapital"></span>
+          </div>
+
+          <div class="field">
+            <label for="currentAge">Edad actual</label>
+            <div class="input-wrap">
+              <span class="input-prefix">👤</span>
+              <input type="number" id="currentAge" min="1" max="120" step="1" placeholder="30" />
+            </div>
+            <span class="field-error" id="err-currentAge"></span>
+          </div>
+
+          <!-- Target type toggle -->
+          <div class="field field-full">
+            <label>Objetivo de tiempo</label>
+            <div class="radio-group">
+              <label class="radio-label">
+                <input type="radio" name="targetType" value="age" id="targetType-age" checked />
+                Edad objetivo
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="targetType" value="years" id="targetType-years" />
+                Años a invertir
+              </label>
+            </div>
+          </div>
+
+          <div class="field" id="field-targetAge">
+            <label for="targetAge">Edad objetivo</label>
+            <div class="input-wrap">
+              <span class="input-prefix">🎯</span>
+              <input type="number" id="targetAge" min="1" max="120" step="1" placeholder="65" />
+            </div>
+            <span class="field-error" id="err-targetAge"></span>
+          </div>
+
+          <div class="field hidden" id="field-targetYears">
+            <label for="targetYears">Años a invertir</label>
+            <div class="input-wrap">
+              <span class="input-prefix">📅</span>
+              <input type="number" id="targetYears" min="1" max="100" step="1" placeholder="35" />
+            </div>
+            <span class="field-error" id="err-targetYears"></span>
+          </div>
+
+          <div class="field">
+            <label for="annualRate">Tasa de interés anual (%)</label>
+            <div class="input-wrap">
+              <span class="input-prefix">%</span>
+              <input type="number" id="annualRate" min="0.01" step="any" placeholder="7" />
+            </div>
+            <span class="field-error" id="err-annualRate"></span>
+          </div>
+
+          <div class="field">
+            <label for="monthlyContrib">Aportación mensual</label>
+            <div class="input-wrap">
+              <span class="input-prefix currency-symbol">$</span>
+              <input type="number" id="monthlyContrib" min="0" step="any" placeholder="500" />
+            </div>
+            <span class="field-error" id="err-monthlyContrib"></span>
+          </div>
+
+          <!-- Inflation toggle -->
+          <div class="field field-full inflation-row">
+            <label class="toggle-label">
+              <span>Simular inflación</span>
+              <div class="toggle">
+                <input type="checkbox" id="inflationToggle" />
+                <span class="slider"></span>
+              </div>
+            </label>
+            <div class="field hidden" id="field-inflationRate">
+              <div class="input-wrap" style="margin-top:8px">
+                <span class="input-prefix">📉</span>
+                <input type="number" id="inflationRate" min="0" step="any" placeholder="5" />
+                <span class="input-suffix">% anual</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="btn-row">
+          <button class="btn-primary" id="btnCalculate">⚡ Calcular</button>
+          <button class="btn-secondary" id="btnReset">🔄 Reiniciar</button>
+        </div>
+      </div>
+
+      <!-- Results (hidden until calculated) -->
+      <div id="results" class="results hidden">
+
+        <!-- Summary Cards -->
+        <div class="summary-grid" id="summary-cards">
+          <div class="summary-card card">
+            <span class="summary-icon">💰</span>
+            <p class="summary-label">Total Invertido</p>
+            <p class="summary-value" id="s-invested">—</p>
+          </div>
+          <div class="summary-card card accent-green">
+            <span class="summary-icon">📈</span>
+            <p class="summary-label">Intereses Ganados</p>
+            <p class="summary-value" id="s-interest">—</p>
+          </div>
+          <div class="summary-card card accent-blue">
+            <span class="summary-icon">🏦</span>
+            <p class="summary-label">Total Acumulado</p>
+            <p class="summary-value" id="s-total">—</p>
+          </div>
+          <div class="summary-card card accent-purple">
+            <span class="summary-icon">🚀</span>
+            <p class="summary-label">Rendimiento Total</p>
+            <p class="summary-value" id="s-return">—</p>
+          </div>
+          <div class="summary-card card accent-orange hidden" id="card-real">
+            <span class="summary-icon">💵</span>
+            <p class="summary-label">Valor Real (Inflación)</p>
+            <p class="summary-value" id="s-real">—</p>
+          </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="charts-row">
+          <div class="card chart-card">
+            <h3>Composición del Capital</h3>
+            <div class="chart-wrap"><canvas id="pieChart"></canvas></div>
+          </div>
+          <div class="card chart-card chart-card-wide">
+            <h3>Crecimiento Año a Año</h3>
+            <div class="chart-wrap"><canvas id="lineChart"></canvas></div>
+          </div>
+        </div>
+
+        <!-- Year Table -->
+        <div class="card">
+          <div class="table-header-row">
+            <h3>📋 Detalle Año a Año</h3>
+            <button class="btn-export" id="btnExportPDF">⬇ Exportar PDF</button>
+          </div>
+          <div class="table-wrap">
+            <table id="yearTable">
+              <thead>
+                <tr>
+                  <th>Año</th>
+                  <th>Edad</th>
+                  <th>Total Invertido</th>
+                  <th>Intereses Acumulados</th>
+                  <th>Total Acumulado</th>
+                  <th id="th-real" class="hidden">Valor Real</th>
+                </tr>
+              </thead>
+              <tbody id="yearTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div><!-- /results -->
+    </section>
+
+    <!-- ====== TAB: COMPARE ====== -->
+    <section class="tab-content" id="tab-content-compare">
+      <div class="compare-grid">
+
+        <!-- Scenario A -->
+        <div class="card form-card">
+          <h2 class="card-title scenario-a-title">🔵 Escenario A</h2>
+          <div class="form-grid">
+            <div class="field">
+              <label>Capital inicial</label>
+              <div class="input-wrap"><span class="input-prefix currency-symbol">$</span><input type="number" class="cmp-input" data-field="initialCapital" data-s="a" min="0" step="any" placeholder="10,000" /></div>
+              <span class="field-error" id="cmp-err-a-initialCapital"></span>
+            </div>
+            <div class="field">
+              <label>Años a invertir</label>
+              <div class="input-wrap"><span class="input-prefix">📅</span><input type="number" class="cmp-input" data-field="years" data-s="a" min="1" step="1" placeholder="30" /></div>
+              <span class="field-error" id="cmp-err-a-years"></span>
+            </div>
+            <div class="field">
+              <label>Tasa anual (%)</label>
+              <div class="input-wrap"><span class="input-prefix">%</span><input type="number" class="cmp-input" data-field="rate" data-s="a" min="0.01" step="any" placeholder="7" /></div>
+              <span class="field-error" id="cmp-err-a-rate"></span>
+            </div>
+            <div class="field">
+              <label>Aportación mensual</label>
+              <div class="input-wrap"><span class="input-prefix currency-symbol">$</span><input type="number" class="cmp-input" data-field="monthly" data-s="a" min="0" step="any" placeholder="500" /></div>
+              <span class="field-error" id="cmp-err-a-monthly"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scenario B -->
+        <div class="card form-card">
+          <h2 class="card-title scenario-b-title">🟢 Escenario B</h2>
+          <div class="form-grid">
+            <div class="field">
+              <label>Capital inicial</label>
+              <div class="input-wrap"><span class="input-prefix currency-symbol">$</span><input type="number" class="cmp-input" data-field="initialCapital" data-s="b" min="0" step="any" placeholder="5,000" /></div>
+              <span class="field-error" id="cmp-err-b-initialCapital"></span>
+            </div>
+            <div class="field">
+              <label>Años a invertir</label>
+              <div class="input-wrap"><span class="input-prefix">📅</span><input type="number" class="cmp-input" data-field="years" data-s="b" min="1" step="1" placeholder="30" /></div>
+              <span class="field-error" id="cmp-err-b-years"></span>
+            </div>
+            <div class="field">
+              <label>Tasa anual (%)</label>
+              <div class="input-wrap"><span class="input-prefix">%</span><input type="number" class="cmp-input" data-field="rate" data-s="b" min="0.01" step="any" placeholder="10" /></div>
+              <span class="field-error" id="cmp-err-b-rate"></span>
+            </div>
+            <div class="field">
+              <label>Aportación mensual</label>
+              <div class="input-wrap"><span class="input-prefix currency-symbol">$</span><input type="number" class="cmp-input" data-field="monthly" data-s="b" min="0" step="any" placeholder="300" /></div>
+              <span class="field-error" id="cmp-err-b-monthly"></span>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /compare-grid -->
+
+      <div class="btn-row centered">
+        <button class="btn-primary" id="btnCompare">⚡ Comparar</button>
+        <button class="btn-secondary" id="btnResetCompare">🔄 Reiniciar</button>
+      </div>
+
+      <!-- Compare Results -->
+      <div id="compareResults" class="results hidden">
+
+        <!-- Side by side summary -->
+        <div class="compare-summary-grid">
+          <div class="card accent-blue-border">
+            <h3 class="scenario-a-title">🔵 Escenario A</h3>
+            <div class="cmp-row"><span>Total Invertido</span><strong id="ca-invested">—</strong></div>
+            <div class="cmp-row"><span>Intereses</span><strong id="ca-interest">—</strong></div>
+            <div class="cmp-row highlight"><span>Total Acumulado</span><strong id="ca-total">—</strong></div>
+            <div class="cmp-row"><span>Rendimiento</span><strong id="ca-return">—</strong></div>
+          </div>
+          <div class="card winner-banner hidden" id="winner-banner">
+            <p id="winner-text">🏆 Escenario A gana por</p>
+            <p class="winner-diff" id="winner-diff">—</p>
+          </div>
+          <div class="card accent-green-border">
+            <h3 class="scenario-b-title">🟢 Escenario B</h3>
+            <div class="cmp-row"><span>Total Invertido</span><strong id="cb-invested">—</strong></div>
+            <div class="cmp-row"><span>Intereses</span><strong id="cb-interest">—</strong></div>
+            <div class="cmp-row highlight"><span>Total Acumulado</span><strong id="cb-total">—</strong></div>
+            <div class="cmp-row"><span>Rendimiento</span><strong id="cb-return">—</strong></div>
+          </div>
+        </div>
+
+        <!-- Overlay line chart -->
+        <div class="card">
+          <h3>📊 Crecimiento Comparativo</h3>
+          <div class="chart-wrap"><canvas id="compareLineChart"></canvas></div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <p>Calculadora de Ahorros y Rendimiento · Los cálculos son aproximaciones y no constituyen asesoramiento financiero.</p>
+  </footer>
+
+  <!-- External libs (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
